@@ -38,4 +38,16 @@ public class ParalellStreamExample {
                 .collect(Collectors.toList());
 
     }
+
+    public List<String> toLowerCase(List<String> list) {
+        List<String> stringList = List.of("Bob", "Jamie", "Jill", "Rick");
+
+        List<String> result = stringList.
+                parallelStream()
+                .map(String::toLowerCase)
+                .collect(Collectors.toList());
+
+        return result;
+
+    }
 }
