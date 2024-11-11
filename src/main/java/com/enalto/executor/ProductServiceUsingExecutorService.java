@@ -40,6 +40,10 @@ public class ProductServiceUsingExecutorService {
 
         stopWatch.stop();
         System.out.println(stopWatch.getElapsedTime());
+        if(!executorService.isShutdown())
+            executorService.shutdown();
+
+        System.out.println("Using executorService");
         return new Product(productId, productInfo, review);
     }
 
