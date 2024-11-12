@@ -26,15 +26,27 @@ public class ComplatableFutureHelloWorldException {
 
         CompletableFuture<String> completableFutureHi = CompletableFuture.supplyAsync(() -> {
             CommonUtil.delay(1000);
-            return "HI CompletableFuture!";
+            return " HI CompletableFuture!";
         });
 
         String hello = completableFutureHello
                 .handle((response, exception) -> {
-                    logger.info(exception.getMessage());
-                    return "";
+                    if (exception != null) {
+                        logger.info(exception.getMessage());
+                        return "";
+                    } else {
+                        return response;
+                    }
                 })
                 .thenCombine(completableFutureWorld, (completableHello, completableWorld) -> completableHello + completableWorld)
+                .handle((response, exception) -> {
+                    if (exception != null) {
+                        logger.info(exception.getMessage());
+                        return "";
+                    } else {
+                        return response;
+                    }
+                })
                 .thenCombine(completableFutureHi, (previous, current) -> previous + current)
                 .thenApply(String::toLowerCase)
                 .join();

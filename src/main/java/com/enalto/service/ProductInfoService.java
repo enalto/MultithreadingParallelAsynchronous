@@ -11,8 +11,8 @@ public class ProductInfoService {
 
     public ProductInfo retrieveProductInfo(String productId) {
         CommonUtil.delay(1000);
-        List<ProductOption> productOptions = List.of(new ProductOption(1, "64GB", "Blue", 12.90),
-                new ProductOption(2, "128GB", "Black", 749.99));
+        List<ProductOption> productOptions = List.of(new ProductOption(1, "64GB", "Blue", 12.90, null),
+                new ProductOption(2, "128GB", "Black", 749.99, null));
 
         return ProductInfo.builder()
                 .productId(productId)
