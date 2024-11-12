@@ -4,6 +4,7 @@ import com.enalto.domain.*;
 import com.enalto.service.InvetoryService;
 import com.enalto.service.ProductInfoService;
 import com.enalto.service.ReviewService;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Objects;
@@ -12,10 +13,11 @@ import java.util.stream.Collectors;
 
 import static com.enalto.util.CommonUtil.stopWatch;
 
+@Slf4j
 public class ProductServiceCompletableFuture {
     private final ProductInfoService productInfoService;
     private final ReviewService reviewService;
-    private InvetoryService invetoryService;
+    private InvetoryService invetoryService=new InvetoryService();
 
     public ProductServiceCompletableFuture(final ProductInfoService productInfoService, final ReviewService reviewService) {
         Objects.requireNonNull(productInfoService);
@@ -65,7 +67,14 @@ public class ProductServiceCompletableFuture {
                         });
 
         CompletableFuture<Review> reviewCompletableFuture =
-                CompletableFuture.supplyAsync(() -> reviewService.retrieveReviews(productId));
+                CompletableFuture.supplyAsync(() -> reviewService.retrieveReviews(productId))
+                        .exceptionally(exception -> {
+                            log.info(exception.getMessage());
+                            return Review.builder()
+                                    .noOfReviews(0)
+                                    .overallRatings(0.00)
+                                    .build();
+                        });
 
         Product product = productInfoCompletableFuture.thenCombine(reviewCompletableFuture,
                 (productInfo, review) -> new Product(productId, productInfo, review)

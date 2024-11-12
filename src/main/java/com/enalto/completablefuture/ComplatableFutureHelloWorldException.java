@@ -57,4 +57,36 @@ public class ComplatableFutureHelloWorldException {
 
     }
 
+    public String helloWorldAsyncCallsExceptionExceptionally() {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+
+        CompletableFuture<String> completableFutureHello = CompletableFuture.supplyAsync(() -> helloWorldService.Hello());
+        CompletableFuture<String> completableFutureWorld = CompletableFuture.supplyAsync(() -> helloWorldService.World());
+
+        CompletableFuture<String> completableFutureHi = CompletableFuture.supplyAsync(() -> {
+            CommonUtil.delay(1000);
+            return " HI CompletableFuture!";
+        });
+
+        String hello = completableFutureHello
+                .exceptionally(exception -> {
+                    logger.info(exception.getMessage());
+                    return "";
+                })
+                .thenCombine(completableFutureWorld, (completableHello, completableWorld) -> completableHello + completableWorld)
+                .exceptionally(exception -> {
+                    logger.info(exception.getMessage());
+                    return "";
+                })
+                .thenCombine(completableFutureHi, (previous, current) -> previous + current)
+                .thenApply(String::toLowerCase)
+                .join();
+
+        stopWatch.stop();
+        System.out.println(stopWatch.getElapsedTime());
+        return hello;
+
+    }
+
 }
