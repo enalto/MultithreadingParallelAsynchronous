@@ -17,7 +17,7 @@ import static com.enalto.util.CommonUtil.stopWatch;
 public class ProductServiceCompletableFuture {
     private final ProductInfoService productInfoService;
     private final ReviewService reviewService;
-    private InvetoryService invetoryService=new InvetoryService();
+    private InvetoryService invetoryService = new InvetoryService();
 
     public ProductServiceCompletableFuture(final ProductInfoService productInfoService, final ReviewService reviewService) {
         Objects.requireNonNull(productInfoService);
@@ -77,8 +77,13 @@ public class ProductServiceCompletableFuture {
                         });
 
         Product product = productInfoCompletableFuture.thenCombine(reviewCompletableFuture,
-                (productInfo, review) -> new Product(productId, productInfo, review)
-        ).join();
+                        (productInfo, review) -> new Product(productId, productInfo, review)
+
+                )
+                .whenComplete((product1, throwable) -> {
+                    log.info("ProductInfo {}, and exceptions is {}", product1, throwable.getMessage());
+                })
+                .join();
 
         stopWatch.stop();
         System.out.println(stopWatch.getElapsedTime());

@@ -124,4 +124,20 @@ class ProductServiceCompletableFutureTest {
 
 
     }
+
+    @Test
+    void retrieveProductDetailsWithInventoryProductInfoError() {
+        //scenario
+        String productId = "Product 1";
+
+        //action
+        Mockito.when(productInfoService.retrieveProductInfo(Mockito.any())).thenThrow(new RuntimeException("Exception ocurred!"));
+        Mockito.when(reviewService.retrieveReviews(Mockito.any())).thenCallRealMethod();
+        //Mockito.when(invetoryService.retrieveInventory(Mockito.any())).thenCallRealMethod();
+
+        //verification
+        Assertions.assertThrows(RuntimeException.class,
+                () -> productServiceCompletableFuture.retrieveProductDetailsWithInventory(productId));
+
+    }
 }
