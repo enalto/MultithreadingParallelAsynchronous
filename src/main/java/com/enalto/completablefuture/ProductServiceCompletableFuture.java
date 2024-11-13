@@ -91,13 +91,26 @@ public class ProductServiceCompletableFuture {
     }
 
     private List<ProductOption> updateInventory(ProductInfo productInfo) {
-        return productInfo.getProductOptions()
+        List<CompletableFuture<ProductOption>> productOptionList = productInfo.getProductOptions()
                 .stream()
-                .map((productOption) -> {
-                    Inventory inventory = invetoryService.retrieveInventory(productOption);
-                    productOption.setInventory(inventory);
-                    return productOption;
-                }).collect(Collectors.toList());
+                .map(productOption ->
+                        CompletableFuture.supplyAsync(() -> invetoryService.retrieveInventory(productOption))
+                                .exceptionally(exception -> {
+                                    log.info("Exception in Inventory Service : " + exception.getMessage());
+                                    return Inventory.builder().count(1).build();
+                                })
+                                .thenApply((inventory -> {
+                                    productOption.setInventory(inventory);
+                                    return productOption;
+                                }))).collect(Collectors.toList());
+
+        CompletableFuture<Void> cfAllOf = CompletableFuture.allOf(productOptionList.toArray(new CompletableFuture[productOptionList.size()]));
+        return cfAllOf
+                .thenApply(v -> {
+                    return productOptionList.stream().map(CompletableFuture::join)
+                            .collect(Collectors.toList());
+                }).join();
+
     }
 
     public CompletableFuture<Product> retrieveProductDetailsNonBlocking(String productId) {
